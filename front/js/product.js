@@ -19,14 +19,19 @@ const displayKanapInfo = (kanapInfo) => {
     )
 }
 
-let cart = [];
+let cart;
+if (localStorage.getItem("kanap Order") == null) {
+    cart = new Array();
+} else {
+    cart = JSON.parse(localStorage.getItem("kanap Order"));
+}
 
 document.getElementById('addToCart').addEventListener ('click', () => {
     let selectedColor = document.getElementById("colors");
     let productColor = selectedColor.options[selectedColor.selectedIndex].text;
     let productQuantity = Number(document.getElementById("quantity").value);
     let isInCart = false;
-
+    
     const kanap = {
         id: productId,
         color: productColor,

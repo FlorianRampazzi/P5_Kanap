@@ -21,3 +21,4 @@ const displayOneKanap = (kanap) => {
 function displayKanaps(kanaps) {
   kanaps.forEach(kanap => displayOneKanap(kanap))
 }
+
