@@ -20,6 +20,7 @@ const displayKanapInfo = (kanapInfo) => {
 }
 
 let cart;
+
 if (localStorage.getItem("kanap Order") == null) {
     cart = new Array();
 } else {
@@ -60,8 +61,7 @@ document.getElementById('addToCart').addEventListener ('click', () => {
     //     cart.push([`${productId}`,`${productColor}`,`${productQuantity}`]);
     // }      
 
-    let kanapOrder = JSON.stringify(cart);
-    localStorage.setItem("kanap Order",kanapOrder);
+    localStorage.setItem("kanap Order", JSON.stringify(cart));
 });
 
 function compareKanap(productId, kanap, productColor){
