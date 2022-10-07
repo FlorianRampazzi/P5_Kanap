@@ -10,33 +10,27 @@ GetProductsFromAPI(cart);
   4- Intégrer les valeurs de couleur et de quantité présentes dans le panier dans les objets précédents.
   5- Stocker les nouveaux objets dans un tableau.*/
 async function GetProductsFromAPI(products) {
-  try {
-    for (let i in products) {
-      let APIproduct;
+  for (let i in products) {
+    let APIresult;
 
-      await fetch(`http://localhost:3000/api/products/`+ products[i].id)
-          .then(ResAPI => ResAPI.json())
-          .then(data => (APIproduct = data))
-          .catch(error => console.log(error))
+    await fetch(`http://localhost:3000/api/products/`+ products[i].id)
+        .then(response => response.json())
+        .then(result =>  APIresult = result)
+        .catch(error => console.log(error))
 
-      APIproduct.color = products[i].color;
-      APIproduct.quantity = products[i].quantity;
-      productsAPI.push(APIproduct);
-    }
-
-    DisplayCartProducts();
-
-  } catch(error) {
-    console.log(error);
-  } 
+    APIresult.color = products[i].color;
+    APIresult.quantity = products[i].quantity;
+    productsAPI.push(APIresult);
+  }
+  DisplayCartProducts(productsAPI);
 }
 /*1- Pour chaque produit contenu dans le panier :
   2- Générer le noeud html nodeCart.
   3- Intégrer les valeurs propres à chaques produit.
   4- Afficher le tout dans l'HTML.
   5- Appeler les fonctions de calcul totaux et de modification/suppression.*/
-function DisplayCartProducts() {
-  productsAPI.forEach(products => {
+function DisplayCartProducts(product) {
+  product.forEach(products => {
 
     const nodeCart = `<article class="cart__item" data-id="${products._id}" data-color="${products.color}">
                       <div class="cart__item__img">
@@ -68,23 +62,24 @@ function DisplayCartProducts() {
   DeleteProductInCart();
 };
 /*1- Initialisation des variable totales quantité et prix à 0.
-  2- Boucle parcourant le panier et récupérant l'id de chaque produits.
-  3- Ajout de la quantité de chaque produit dans la variable totalQuantity.
-  4- Ajout du prix de chaque produit dans la variable totalPrice et multiplication de chaque prix par la quantité de chaque produit.
-  5- Affichage des valeurs totales.*/
+  2- Condition : si le panier est vide afficher le message "panier vide" sinon :
+  3- Boucle parcourant le panier et récupérant l'id de chaque produits.
+  4- Ajout de la quantité de chaque produit dans la variable totalQuantity.
+  5- Ajout du prix de chaque produit dans la variable totalPrice et multiplication de chaque prix par la quantité de chaque produit.
+  6- Affichage des valeurs totales.*/
 function TotalQuantityAndPrice() {
-    let totalQuantity = 0;
-    let totalPrice = 0;
+  let totalQuantity = 0;
+  let totalPrice = 0;
+  
+  for (let i in cart) {
+    let currentIndex = productsAPI.findIndex(product => product._id == cart[i].id);
 
-    for (let i in cart) {
-      let currentIndex = productsAPI.findIndex(product => product._id == cart[i].id);
-
-      totalQuantity += cart[i].quantity;
-      totalPrice += cart[i].quantity * productsAPI[currentIndex].price;
-    }
-
-    document.querySelector("#totalQuantity").innerHTML = totalQuantity;
-    document.querySelector("#totalPrice").innerHTML = totalPrice;
+    totalQuantity += cart[i].quantity;
+    totalPrice += cart[i].quantity * productsAPI[currentIndex].price;
+  }
+  document.querySelector("#totalQuantity").innerHTML = totalQuantity;
+  document.querySelector("#totalPrice").innerHTML = totalPrice;
+  CartIsEmpty();
 }
 /*1- Récupération des inputs de quantité et ajout d'un eventListener change.
   2- Récupération du noeud (article) contenant le produit et ses datas id et color.
@@ -99,20 +94,14 @@ function InputQuantitytyUpdate() {
   inputQuantity.forEach((inputQuantity) => {
     inputQuantity.addEventListener("change", (e) => {
 
+      MinMaxValueInput(e.target);
+
       let article = inputQuantity.closest("article");
       let dataId = article.getAttribute("data-id");
       let dataColor = article.getAttribute("data-color");
 
       for (let i in cart) {
         if (cart[i].id === dataId && cart[i].color === dataColor) {
-
-          if (e.target.value > 100) {
-            e.target.value = 100;
-
-          } else if (e.target.value < 1) {
-            e.target.value = 1;
-          } 
-
           cart[i].quantity = parseInt(e.target.value);
           localStorage.setItem("kanap Order", JSON.stringify(cart));
         }
@@ -120,6 +109,19 @@ function InputQuantitytyUpdate() {
       }
     })
   })
+}
+/*1- Compare la valeur en entrée.
+  2- Si elle est supérieure à 100, retourner 100.
+  3- Si elle est inférieure à 1 retourner 1.
+  4- Sinon ne rien faire.
+*/
+function MinMaxValueInput(input) {
+  if (input.value > 100) {
+    input.value = 100;
+
+  } else if (input.value < 1) {
+   input.value = 1;
+  } 
 }
 /*1- Récupération des boutons "supprimer" et ajout d'une écoute d'evennement clic.
   2- Récupération du noeud (article) contenant le produit et ses datas id et color.
@@ -141,73 +143,53 @@ function DeleteProductInCart() {
       let productIndex = cart.findIndex(element => element.id === dataId && element.color === dataColor);
       cart.splice(productIndex, 1);
       
-      localStorage.setItem("kanap Order", JSON.stringify(cart));
+      if(cart.length == 0) {
+        localStorage.removeItem("kanap Order");
+        cart = null;
+      } else {
+        localStorage.setItem("kanap Order", JSON.stringify(cart));
+      }
       article.remove();
 
       TotalQuantityAndPrice();
+      CartIsEmpty()
     })
   })
 }
+function CartIsEmpty() {
+  if(cart === null || localStorage.getItem("kanap Order") === null) {
+    document.querySelector("h1").innerHTML =
+    "Votre panier est vide";
+  }
+}
 /* --------------------------------------------------------------------------------------------------------------
-  1- Récupération des saisie dans les champs du formulaire.
-  2- Définition des regEx.
-  3- Récupération de la balise pour l'affichage du message d'erreur.
-  4- Message d'erreur à afficher.*/
-//FIRST NAME INPUT
-let firstName = document.getElementById('firstName');
-let NameRegex = /^[^\n0-9_!¡?÷?¿\/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,20}$/;
-let firstNameError = document.getElementById('firstNameErrorMsg');
-let firstNameErrorMsg = "Saisie invalide : Le prénom doit être uniquement composé de lettres";
-//LAST NAME INPUT
-let lastName = document.getElementById('lastName');
-let lastNameError = document.getElementById('lastNameErrorMsg');
-let lastNameErrorMsg = "Saisie invalide : Le nom doit être uniquement composé de lettres";
-//ADDRESS INPUT
-let address = document.getElementById('address');
-let addressRegex = /^[^\n_!¡?÷?¿\/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,50}$/;
-let addressError = document.getElementById('addressErrorMsg');
-let addressErrorMsg = "Saisie invalide : L'adresse ne doit être pas comporter de caractères spéciaux";
-//CITY INPUT
-let city = document.getElementById('city');
-let cityRegex = /^[^\n0-9_!¡?÷?¿\/\\+=@#$%ˆ&*(){}|~<>;:[\]]{1,50}$/;
-let cityError = document.getElementById('cityErrorMsg');
-let cityErrorMsg = "Saisie invalide : La ville doit être uniquement composée de lettres";
-//EMAIL INPUT
-let email = document.getElementById('email');
-let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-let emailError = document.getElementById('emailErrorMsg');
-let emailErrorMsg = "Saisie invalide : Le format d'adresse mail n'est pas correct";
-
-FormControl();
+  1- Définition des regEx.
+  2- Message d'erreur à afficher.*/
+const regexs = {
+  firstName:"^[a-zA-ZÀ-ú\\.\\-\\'\\ ]{2,20}$", 
+  lastName:"^[a-zA-ZÀ-ú\\.\\-\\'\\ ]{2,20}$", 
+  address:"^[0-9a-zA-ZÀ-ú\\.\\-\\'\\ ]{2,50}$", 
+  city:"^[a-zA-ZÀ-ú\\.\\-\\'\\ ]{2,50}$", 
+  email:"^[0-9a-zA-ZÀ-ú._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}"
+}
+const errorsMsg = {
+  firstName:"Saisie invalide : Le prénom doit être uniquement composé de lettres", 
+  lastName:"Saisie invalide : Le nom doit être uniquement composé de lettres", 
+  address:"Saisie invalide : L'adresse ne doit être pas comporter de caractères spéciaux", 
+  city:"Saisie invalide : La ville doit être uniquement composée de lettres", 
+  email:"Saisie invalide : Le format d'adresse mail n'est pas correct"
+}
 /*1- Récupération des champs du formulaire
   2- Pour chaque champ de saisie :
   3- Ecouter l'évenement de saisie.
-  4- Récupérer le nom de l'input.
-  5- Comparer le nom de l'input avec la liste des cas et appeler la fonction correspondante.*/
-function FormControl() {
-  let allInputs = document.querySelectorAll('.cart__order__form__question > input')
-  allInputs.forEach(input => {
-    input.addEventListener('input', () => {
-
-     let inputName = input.getAttribute('name');
-      switch (inputName) {
-        case 'firstName':
-          InputValidityControl(firstName, NameRegex, firstNameError, firstNameErrorMsg);
-        case 'lastName':
-          InputValidityControl(lastName, NameRegex, lastNameError, lastNameErrorMsg);
-        case 'address':
-          InputValidityControl(address, addressRegex, addressError, addressErrorMsg);
-        case 'city':
-          InputValidityControl(city, cityRegex, cityError, cityErrorMsg);
-        case 'email':
-          InputValidityControl(email, emailRegex, emailError, emailErrorMsg);
-        break;
-        default:
-          console.log('Empty action received.');
-      }
-    });
-  })
-}
+  4- Récupérer le nom de l'input via l'evennement en cours.
+  5- Appeler la fonction InputValidityControl.*/
+let formInputs = document.querySelectorAll('.cart__order__form__question > input');
+formInputs.forEach(input => {
+   input.addEventListener('input', (e) => {
+    InputValidityControl(document.getElementById(e.currentTarget.name));
+   })
+})
 /*1- Fonction de validation générique
   2- Prendre en paramètres les variables définies précédement.
   3- Si la valeur du champs est valide par rapport à la regEx utilisée :
@@ -216,7 +198,12 @@ function FormControl() {
   6- Si la valeur du champs n'est pas valide par rapport à la regEx utilisée :
   7- Afficher le message d'erreur et attribuer la couleur de texte rouge.
   8- Définir la fonction disableSubmit sur true.*/
-function InputValidityControl(input, regex, error, errorMsg) {
+function InputValidityControl(input,) {
+  let inputName = input.name;
+  let regex = new RegExp(regexs[inputName]);
+  let error = document.getElementById(`${inputName}ErrorMsg`)
+  let errorMsg = errorsMsg[inputName];
+
   if (regex.test(input.value)) {
     error.innerHTML = "";
     input.style.color = "black";
@@ -253,15 +240,13 @@ class Form {
 }
 SubmitOrder();
 /*1- Récupération du bouton submit et ajout d'un listener au clic.
-  2- Appel de la fonction SetDataOrder.
-  3- Nettoyage du localStorage.*/
+  2- Appel de la fonction SetDataOrder.*/
 function SubmitOrder() {
   let submit = document.getElementById('order');
 
   submit.addEventListener('click', (e) => {
     e.preventDefault();
     SetDataOrder();
-    // localStorage.clear();
   })
 }
 /*1- Création de l'object contact.
@@ -279,9 +264,9 @@ function SetDataOrder() {
 }
 /*1- Envoie des infos contact et des id produits à l'API par méthode POST
   2- Récupération de l'id renvoyé par l'API
-  3- Redirection vers la page confirmation avec pour paramètre d'URL l'id de la commande.*/
+  3- Redirection vers la page confirmation avec pour paramètre d'URL l'id de la commande.
+  4- Nettoyage du localStorage.*/
 async function PostOrder(form, order) {
-  try {
     await fetch("http://localhost:3000/api/products/order" , {
         method: 'POST',
         headers: {
@@ -293,8 +278,7 @@ async function PostOrder(form, order) {
         })
       })
     .then(response => response.json())
-    .then(result =>  window.location.assign(`confirmation.html?id=${result.orderId}`))
-  } catch (error) {
-    console.log(error);
-  }
+    .then(result => window.location.assign(`confirmation.html?id=${result.orderId}`))
+    .catch (error => console.log(error))
+  localStorage.clear();
 }
