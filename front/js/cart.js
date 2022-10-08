@@ -34,7 +34,7 @@ function DisplayCartProducts(product) {
 
     const nodeCart = `<article class="cart__item" data-id="${products._id}" data-color="${products.color}">
                       <div class="cart__item__img">
-                        <img src="${products.imageUrl}" alt="${products.altTxt}">
+                        <a href="product.html?id=${products._id}"><img src="${products.imageUrl}" alt="${products.altTxt}"></a>
                       </div>
                       <div class="cart__item__content">
                         <div class="cart__item__content__description">

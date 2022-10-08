@@ -14,6 +14,7 @@ fetch(`http://localhost:3000/api/products/${productId}`)
 function DisplayKanapInfo(kanapInfo) {
     document.querySelector('.item__img').innerHTML = `<img src="${kanapInfo.imageUrl}" alt="${kanapInfo.altTxt}"></img>`;
     document.getElementById('title').innerHTML = kanapInfo.name;
+    document.querySelector('title').innerHTML = kanapInfo.name;
     document.getElementById('price').innerHTML = kanapInfo.price;
     document.getElementById('description').innerHTML = kanapInfo.description;
 
