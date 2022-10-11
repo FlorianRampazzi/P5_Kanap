@@ -170,7 +170,7 @@ const regexs = {
   lastName:"^[a-zA-ZÀ-ú\\.\\-\\'\\ ]{2,20}$", 
   address:"^[0-9a-zA-ZÀ-ú\\.\\-\\'\\ ]{2,50}$", 
   city:"^[a-zA-ZÀ-ú\\.\\-\\'\\ ]{2,50}$", 
-  email:"^[0-9a-zA-ZÀ-ú._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}"
+  email:"^[0-9a-zA-ZÀ-ú._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
 }
 const errorsMsg = {
   firstName:"Saisie invalide : Le prénom doit être uniquement composé de lettres", 
