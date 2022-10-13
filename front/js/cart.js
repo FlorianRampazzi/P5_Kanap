@@ -1,6 +1,5 @@
 // Stockage des objets contenu dans le localStorage dans un tableau panier.
 let cart = JSON.parse(localStorage.getItem("kanap Order"));
-
 let productsAPI = [];
 
 GetProductsFromAPI(cart);
@@ -9,11 +8,11 @@ GetProductsFromAPI(cart);
   3- Récupérer les données correspondantes au format JSON et les convertir en objet JavaScript.
   4- Intégrer les valeurs de couleur et de quantité présentes dans le panier dans les objets précédents.
   5- Stocker les nouveaux objets dans un tableau.*/
-async function GetProductsFromAPI(products) {
+function GetProductsFromAPI(products) {
   for (let i in products) {
     let APIresult;
 
-    await fetch(`http://localhost:3000/api/products/`+ products[i].id)
+    fetch(`http://localhost:3000/api/products/`+ products[i].id)
         .then(response => response.json())
         .then(result =>  APIresult = result)
         .catch(error => console.log(error))
@@ -156,14 +155,16 @@ function DeleteProductInCart() {
     })
   })
 }
+/*1- Si le panier ou le localStorage est vide
+  2- Remplacer le titre "votre panier" par "votre panier est vide"*/
 function CartIsEmpty() {
   if(cart === null || localStorage.getItem("kanap Order") === null) {
     document.querySelector("h1").innerHTML =
     "Votre panier est vide";
   }
 }
-/* --------------------------------------------------------------------------------------------------------------
-  1- Définition des regEx.
+/* --- FORM -----------------------------------------------------------------------------------------------------------*/
+/*1- Définition des regEx.
   2- Message d'erreur à afficher.*/
 const regexs = {
   firstName:"^[a-zA-ZÀ-ú\\.\\-\\'\\ ]{2,20}$", 
@@ -198,7 +199,7 @@ formInputs.forEach(input => {
   6- Si la valeur du champs n'est pas valide par rapport à la regEx utilisée :
   7- Afficher le message d'erreur et attribuer la couleur de texte rouge.
   8- Définir la fonction disableSubmit sur true.*/
-function InputValidityControl(input,) {
+function InputValidityControl(input) {
   let inputName = input.name;
   let regex = new RegExp(regexs[inputName]);
   let error = document.getElementById(`${inputName}ErrorMsg`)
@@ -207,17 +208,17 @@ function InputValidityControl(input,) {
   if (regex.test(input.value)) {
     error.innerHTML = "";
     input.style.color = "black";
-    disableSubmit(false);
+    DisableSubmit(false);
   } else {
     error.innerHTML = errorMsg;
     input.style.color = "red";
-    disableSubmit(true);
+    DisableSubmit(true);
   }
 }
 /*1- Si la valeur de disableSubmit est égale à false :
   2- Ajouter l'attribut disable=true a l'input submit dans l'HTML afin de le rendre inopérant.
   3- Sinon enlever l'attribut disable.*/
-function disableSubmit(disabled) {
+function DisableSubmit(disabled) {
   if (disabled) {
     document
       .getElementById("order")
@@ -238,36 +239,45 @@ class Form {
     this.email = email.value;
   }
 }
-SubmitOrder();
 /*1- Récupération du bouton submit et ajout d'un listener au clic.
   2- Appel de la fonction SetDataOrder.*/
-function SubmitOrder() {
-  let submit = document.getElementById('order');
-
-  submit.addEventListener('click', (e) => {
-    e.preventDefault();
-    SetDataOrder();
-  })
-}
-/*1- Création de l'object contact.
-  2- Création du tableau des ids produits
-  3- Pour chaque produit contenu dans le panier, ajpouter son id dans le tableau productsId.*/
-function SetDataOrder() {
+document.getElementById('order').addEventListener('click', (e) => {
+  e.preventDefault();
   let contactForm = new Form(firstName, lastName, address, city, email);
-  let productsId = [];
 
-  cart.forEach( product => {
-    productsId.push(product.id);
-  });
-
-  PostOrder(contactForm, productsId); 
+  VerifyOrder(cart, contactForm)
+})
+/*1- Pour chaque paire de clé/valeur de l'object en paramètre
+  2- Si la valeur est indéfinie, inexistante ou une chaine de caractère vide
+  3- Alors on retourne true*/
+function InputIsEmpty(form) {
+  for(const [key, value] of Object.entries(form)) {
+    if(value == undefined || value == null || value === '') {
+      return true;
+    }
+  }
+}
+/*1- Si le panier est vide, afficher l'alerte correspondante et empêcher l'envoi de la commande
+  2- Si le formulaire est vide, afficher l'alerte correspondante et empêcher l'envoi de la commande
+  3- Autoriser l'envoie de la commande.*/
+function VerifyOrder(cart, form) {
+  if (cart == null){
+    alert('Votre panier est vide')
+  } else if (InputIsEmpty(form) == true) {
+    alert('Veuillez saisir vos informations de livraison')
+  } else {
+    let productsId = [];
+    cart.forEach( product => productsId.push(product.id));
+    PostOrder(productsId, form); 
+    console.log('Execute PostOrder')
+  }
 }
 /*1- Envoie des infos contact et des id produits à l'API par méthode POST
   2- Récupération de l'id renvoyé par l'API
   3- Redirection vers la page confirmation avec pour paramètre d'URL l'id de la commande.
   4- Nettoyage du localStorage.*/
-async function PostOrder(form, order) {
-    await fetch("http://localhost:3000/api/products/order" , {
+  function PostOrder(order, form) {
+    fetch("http://localhost:3000/api/products/order" , {
         method: 'POST',
         headers: {
           'Content-Type': 'application/JSON'
@@ -280,5 +290,5 @@ async function PostOrder(form, order) {
     .then(response => response.json())
     .then(result => window.location.assign(`confirmation.html?id=${result.orderId}`))
     .catch (error => console.log(error))
-  localStorage.clear();
-}
+    localStorage.clear();
+  }
