@@ -37,7 +37,6 @@ function CartAlreadyExist() {
         cart = JSON.parse(localStorage.getItem("kanap Order"));
     }
 }
-
 /*1- Ajout d'un eventListener sur le bouton ajouter au panier.
   2- Récupération de la couleur et de la quantité sélectionnée.
   3- Appel de la fonction VerifyProductSelect.*/
@@ -63,6 +62,19 @@ function VerifyProductSelect(productColor, productQuantity) {
         AddToCart(productColor, productQuantity);
     }
 }
+/*1- Compare la valeur en entrée sur le champs quantité.
+  2- Si elle est supérieure à 100, retourner 100.
+  3- Si elle est inférieure à 1 retourner 1.
+  4- Sinon ne rien faire.*/
+function MinMaxValueInput() {
+  document.getElementById('quantity').addEventListener("input", (e) => {
+      if (e.target.value > 100) {
+          e.target.value = 100;
+      } else if (e.target.value < 1) {
+          e.target.value = 1;
+      } 
+  });
+}
 /*1- Création d'une constante kanap avec pour clés id, color et quantity.
   2- Pour chaque produit du panier, comparer la couleur et l'id :
   3- Si le produit est déjà présent dans le panier, incrémenter la quantité et initialiser IsInCart à true.
@@ -85,18 +97,6 @@ function AddToCart(color, quantity){
         localStorage.setItem("kanap Order", JSON.stringify(cart));
         alert(`${productName} à bien été ajouté au panier`)
 }
-/*1- Compare la valeur en entrée sur le champs quantité.
-  2- Si elle est supérieure à 100, retourner 100.
-  3- Si elle est inférieure à 1 retourner 1.
-  4- Sinon ne rien faire.*/
-function MinMaxValueInput() {
-    document.getElementById('quantity').addEventListener("input", (e) => {
-        if (e.target.value > 100) {
-            e.target.value = 100;
-        } else if (e.target.value < 1) {
-            e.target.value = 1;
-        } 
-    });
-}
+
 
 

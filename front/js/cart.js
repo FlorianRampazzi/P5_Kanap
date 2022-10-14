@@ -8,15 +8,15 @@ GetProductsFromAPI(cart);
   3- Récupérer les données correspondantes au format JSON et les convertir en objet JavaScript.
   4- Intégrer les valeurs de couleur et de quantité présentes dans le panier dans les objets précédents.
   5- Stocker les nouveaux objets dans un tableau.*/
-function GetProductsFromAPI(products) {
+async function GetProductsFromAPI(products) {
   for (let i in products) {
     let APIresult;
 
-    fetch(`http://localhost:3000/api/products/`+ products[i].id)
+    await fetch(`http://localhost:3000/api/products/`+ products[i].id)
         .then(response => response.json())
         .then(result =>  APIresult = result)
         .catch(error => console.log(error))
-
+    
     APIresult.color = products[i].color;
     APIresult.quantity = products[i].quantity;
     productsAPI.push(APIresult);
@@ -253,6 +253,7 @@ document.getElementById('order').addEventListener('click', (e) => {
 function InputIsEmpty(form) {
   for(const [key, value] of Object.entries(form)) {
     if(value == undefined || value == null || value === '') {
+      console.log(`champs non-rempli : ${key}`)
       return true;
     }
   }
@@ -269,7 +270,6 @@ function VerifyOrder(cart, form) {
     let productsId = [];
     cart.forEach( product => productsId.push(product.id));
     PostOrder(productsId, form); 
-    console.log('Execute PostOrder')
   }
 }
 /*1- Envoie des infos contact et des id produits à l'API par méthode POST
@@ -290,5 +290,5 @@ function VerifyOrder(cart, form) {
     .then(response => response.json())
     .then(result => window.location.assign(`confirmation.html?id=${result.orderId}`))
     .catch (error => console.log(error))
-    localStorage.clear();
+    localStorage.removeItem("kanap Order");
   }
