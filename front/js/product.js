@@ -23,8 +23,11 @@ function DisplayKanapInfo(kanapInfo) {
     kanapInfo.colors.forEach(
         color => document.getElementById('colors').innerHTML += `<option value="${color}">${color}</option>`
     )
+    MinMaxValueInput()
     CartAlreadyExist()
+    SetProductData()
 }
+
 /*2- Si l'objet "kanap Order" n'est pas présent dans le localStorage initialiser cart comme étant un tableau vide
   3- Sinon récupérer l'objet "kanap Order" et initialiser cart avec ses valeurs.*/
 function CartAlreadyExist() {
@@ -34,6 +37,7 @@ function CartAlreadyExist() {
         cart = JSON.parse(localStorage.getItem("kanap Order"));
     }
 }
+
 /*1- Ajout d'un eventListener sur le bouton ajouter au panier.
   2- Récupération de la couleur et de la quantité sélectionnée.
   3- Appel de la fonction VerifyProductSelect.*/
@@ -43,8 +47,7 @@ function SetProductData() {
         let selectedColor = document.getElementById("colors");
         let productColor = selectedColor.options[selectedColor.selectedIndex].text;
         let productQuantity = Number(document.getElementById("quantity").value);
-        
-        MinMaxValueInput()
+      
         VerifyProductSelect(productColor, productQuantity)
     })
 }
